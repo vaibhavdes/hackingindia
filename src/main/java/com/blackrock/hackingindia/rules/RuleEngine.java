@@ -10,47 +10,47 @@ import com.blackrock.hackingindia.utils.DateTimeUtils;
 
 public class RuleEngine {
 
-    public static BigDecimal fixedQRule(long receiptTime, List<RuleQ> qRules) {
+    public static BigDecimal fixedQRule(long transactionDate, List<RuleQ> qRules) {
         if (qRules == null || qRules.isEmpty()) {
             return null;
         }
 
         long latestStart = -1;
-        BigDecimal qOverride = null;
+        BigDecimal qFixedAmountOverride = null;
 
         for (RuleQ qRule : qRules) {
             long start = DateTimeUtils.toEpochMillis(qRule.getStart());
             long end = DateTimeUtils.toEpochMillis(qRule.getEnd());
 
-            if (receiptTime >= start && receiptTime <= end) {
+            if (transactionDate >= start && transactionDate <= end) {
                 if (start > latestStart) {
                     latestStart = start;
-                    qOverride = qRule.getFixed();
+                    qFixedAmountOverride = qRule.getFixed();
                 }
             }
         }
-        return qOverride;
+        return qFixedAmountOverride;
     }
 
-    public static BigDecimal checkAndCalculatePRule(long receiptTime, List<RuleP> pRules) {
-        BigDecimal totalBoost = BigDecimal.ZERO;
+    public static BigDecimal checkAndCalculatePRule(long transactionDate, List<RuleP> pRules) {
+        BigDecimal amountAddition = BigDecimal.ZERO;
 
         if (pRules == null || pRules.isEmpty()) {
-            return totalBoost;
+            return amountAddition;
         }
 
         for (RuleP pRule : pRules) {
             long start = DateTimeUtils.toEpochMillis(pRule.getStart());
             long end = DateTimeUtils.toEpochMillis(pRule.getEnd());
 
-            if (receiptTime >= start && receiptTime <= end) {
-                totalBoost = totalBoost.add(pRule.getExtra());
+            if (transactionDate >= start && transactionDate <= end) {
+                amountAddition = amountAddition.add(pRule.getExtra());
             }
         }
-        return totalBoost;
+        return amountAddition;
     }
 
-    public static boolean checkIfKRule(long receiptTime, List<RuleK> kRules) {
+    public static boolean checkIfKRule(long transactionDate, List<RuleK> kRules) {
         if (kRules == null || kRules.isEmpty()) {
             return false;
         }
@@ -59,7 +59,7 @@ public class RuleEngine {
             long start = DateTimeUtils.toEpochMillis(kRule.getStart());
             long end = DateTimeUtils.toEpochMillis(kRule.getEnd());
 
-            if (receiptTime >= start && receiptTime <= end) {
+            if (transactionDate >= start && transactionDate <= end) {
                 return true;
             }
         }

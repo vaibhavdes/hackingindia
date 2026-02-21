@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Investment Calculator</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial; margin: 30px; background:#f4f6f8; }
+        h2 { margin-bottom: 10px; }
+        .section { background:white; padding:15px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+        input, select { margin:5px; padding:6px; }
+        button { padding:6px 12px; margin:5px 0; cursor:pointer; }
+        .remove-btn { background:#ff4d4d; color:white; border:none; }
+        .add-btn { background:#4CAF50; color:white; border:none; }
+        .submit-btn { background:#007bff; color:white; border:none; }
+        table { border-collapse: collapse; width:100%; margin-top:10px; }
+        table, th, td { border:1px solid #ddd; }
+        th, td { padding:8px; text-align:center; }
+        th { background:#007bff; color:white; }
+        pre { background:#1e1e1e; color:#00ff99; padding:15px; overflow:auto; }
+    </style>
+</head>
+<body>
+
+<h2>Investment Calculator</h2>
+
+<div class="section">
+    Age: <input type="number" id="age" value="30">
+    Wage: <input type="number" id="wage" value="800000">
+    Inflation: <input type="number" step="0.1" id="inflation" value="5.5">
+
+    Investment:
+    <select id="investmentType">
+        <option value="index">Index</option>
+        <option value="nps">NPS</option>
+        <option value="fd">Fixed Diposit</option>
+    </select>
+</div>
+
+<div class="section">
+    <h4>Q Rules</h4>
+    <div id="qContainer"></div>
+    <button class="add-btn" onclick="addQ()">Add Q</button>
+</div>
+
+<div class="section">
+    <h4>P Rules</h4>
+    <div id="pContainer"></div>
+    <button class="add-btn" onclick="addP()">Add P</button>
+</div>
+
+<div class="section">
+    <h4>K Rules</h4>
+    <div id="kContainer"></div>
+    <button class="add-btn" onclick="addK()">Add K</button>
+</div>
+
+<div class="section">
+    <h4>Transactions</h4>
+    <div id="transactionContainer"></div>
+    <button class="add-btn" onclick="addTransaction()">Add Transaction</button>
+</div>
+
+<button class="submit-btn" onclick="submitData()">Submit</button>
+
+<div class="section">
+    <h3>Result</h3>
+    <div id="resultTable"></div>
+    <pre id="responseJson"></pre>
+</div>
+
+<script>
+
+function toDateTime(dt) {
+    if (!dt) return null;
+    return dt.replace("T", " ") + ":00";
+}
+
+function toIsoDate(date) {
+    if (!date) return null;
+    return date + "T00:00:00";
+}
+
+function toIsoDateTime(dt) {
+    if (!dt) return null;
+    return dt + ":00";
+}
+
+function toStartDate(date) {
+    if (!date) return null;
+    return date + " 00:00:00";
+}
+
+function toEndDate(date) {
+    if (!date) return null;
+    return date + " 23:59:59";
+}
+
+function toDateTime(dt) {
+    if (!dt) return null;
+    return dt.replace("T", " ") + ":00";
+}
+
+function removeElement(el) {
+    el.parentElement.remove();
+}
+
+function addQ(fixed="", start="", end="") {
+    document.getElementById("qContainer").innerHTML += `
+        <div>
+            Fixed: <input type="number" value="${fixed}" class="q-fixed">
+            Start: <input type="date" value="${start}" class="q-start">
+            End: <input type="date" value="${end}" class="q-end">
+            <button class="remove-btn" onclick="removeElement(this)">Remove</button>
+        </div>`;
+}
+
+function addP(extra="", start="", end="") {
+    document.getElementById("pContainer").innerHTML += `
+        <div>
+            Extra: <input type="number" value="${extra}" class="p-extra">
+            Start: <input type="date" value="${start}" class="p-start">
+            End: <input type="date" value="${end}" class="p-end">
+            <button class="remove-btn" onclick="removeElement(this)">Remove</button>
+        </div>`;
+}
+
+function addK(start="", end="") {
+    document.getElementById("kContainer").innerHTML += `
+        <div>
+            Start: <input type="date" value="${start}" class="k-start">
+            End: <input type="date" value="${end}" class="k-end">
+            <button class="remove-btn" onclick="removeElement(this)">Remove</button>
+        </div>`;
+}
+
+function addTransaction(date="", amount="") {
+    document.getElementById("transactionContainer").innerHTML += `
+        <div>
+            Date: <input type="datetime-local" value="${date}" class="t-date">
+            Amount: <input type="number" value="${amount}" class="t-amount">
+            <button class="remove-btn" onclick="removeElement(this)">Remove</button>
+        </div>`;
+}
+
+async function submitData() {
+
+    const payload = {
+        age: parseInt(age.value),
+        wage: parseFloat(wage.value),
+        inflation: parseFloat(inflation.value),
+        q: [],
+        p: [],
+        k: [],
+        transactions: []
+    };
+
+    document.querySelectorAll(".q-fixed").forEach((el,i)=>{
+        payload.q.push({
+            fixed: parseFloat(el.value),
+            start: toStartDate(document.querySelectorAll(".q-start")[i].value),
+            end: toEndDate(document.querySelectorAll(".q-end")[i].value)
+        });
+    });
+
+    document.querySelectorAll(".p-extra").forEach((el,i)=>{
+        payload.p.push({
+            extra: parseFloat(el.value),
+            start: toStartDate(document.querySelectorAll(".p-start")[i].value),
+            end: toEndDate(document.querySelectorAll(".p-end")[i].value)
+        });
+    });
+
+    document.querySelectorAll(".k-start").forEach((el,i)=>{
+        payload.k.push({
+            start: toStartDate(el.value),
+            end: toEndDate(document.querySelectorAll(".k-end")[i].value)
+        });
+    });
+
+    document.querySelectorAll(".t-date").forEach((el,i)=>{
+        payload.transactions.push({
+            date: toDateTime(el.value),
+            amount: parseFloat(document.querySelectorAll(".t-amount")[i].value)
+        });
+    });
+
+    const type = investmentType.value;
+    const url = `http://localhost:5477/blackrock/challenge/v1/returns:${type}`;
+
+    const res = await fetch(url, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    renderResult(data);
+}
+
+function renderResult(data){
+
+    let table = `
+        <table>
+            <tr>
+                <th>Start</th>
+                <th>End</th>
+                <th>Amount</th>
+                <th>Profit</th>
+                <th>Tax Benefit</th>
+            </tr>`;
+
+    data.savingsByDates.forEach(row=>{
+        table += `
+            <tr>
+                <td>${row.start}</td>
+                <td>${row.end}</td>
+                <td>${row.amount}</td>
+                <td>${row.profit}</td>
+                <td>${row.taxBenefit}</td>
+            </tr>`;
+    });
+
+    table += `</table>
+              <br><b>Total Ceiling:</b> ${data.totalCeiling}
+              <br><b>Total Transaction Amount:</b> ${data.totalTransactionAmount}`;
+
+    document.getElementById("resultTable").innerHTML = table;
+    document.getElementById("responseJson").innerText =
+        JSON.stringify(data, null, 2);
+}
+
+/* -------------------- PRELOAD SAMPLE DATA -------------------- */
+
+window.onload = function(){
+
+    addQ(10,"2023-11-01","2023-11-30");
+
+    addP(20,"2024-01-01","2024-12-31");
+
+    addK("2023-01-01","2023-12-31");
+    addK("2024-01-01","2024-12-31");
+    addK("2023-01-01","2024-12-31");
+
+    addTransaction("2023-05-10 10:00",250);
+    addTransaction("2023-11-15 14:00",120);
+    addTransaction("2024-02-20 09:30",510);
+    addTransaction("2024-08-00 18:45",330);
+};
+
+</script>
+
+</body>
+</html>

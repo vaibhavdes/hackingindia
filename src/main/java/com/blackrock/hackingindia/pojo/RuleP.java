@@ -9,6 +9,8 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
+// concerned about your future, you add an extra amount to the amounts to be invested
+// (Extra Amount Addition)
 public class RuleP {
     
     @NotNull(message = "Extra value must not be null")
@@ -17,6 +19,7 @@ public class RuleP {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm[:ss]")
     private LocalDateTime start;
+    
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm[:ss]")
     private LocalDateTime end;
 

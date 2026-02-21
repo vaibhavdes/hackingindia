@@ -9,6 +9,7 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
+// recorded during the year when you can only invest a fixed amount
 public class RuleQ {
 
     @NotNull(message = "Fixed value must not be null")

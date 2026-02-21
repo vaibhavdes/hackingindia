@@ -6,7 +6,7 @@ WORKDIR /app
 COPY build.gradle settings.gradle gradle.* ./
 COPY src ./src
 
-RUN gradle clean build -x test --no-daemon
+RUN gradle clean build --no-daemon
 
 # --------- Run Stage ----------
 
@@ -17,7 +17,7 @@ FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 
 # Copy jar file
-COPY build/libs/*.jar app.jar
+COPY --from=build /app/build/libs/*.jar app.jar
 
 # Expose application port
 EXPOSE 5477

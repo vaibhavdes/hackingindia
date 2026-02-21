@@ -12,9 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.blackrock.hackingindia.exceptions.NegativeNumberException;
 import com.blackrock.hackingindia.pojo.Result;
-import com.blackrock.hackingindia.pojo.RuleK;
-import com.blackrock.hackingindia.pojo.RuleP;
-import com.blackrock.hackingindia.pojo.RuleQ;
+
 import com.blackrock.hackingindia.pojo.Transaction;
 import com.blackrock.hackingindia.pojo.TransactionOutput;
 import com.blackrock.hackingindia.request.FilterRequest;
@@ -34,13 +32,16 @@ public class TransactionProcessService {
                 Result mathResult = NumberUtils.calculateCeilingAndRemanent(expense.getAmount());
                 output.setCeiling(mathResult.getCeiling());
                 output.setRemanent(mathResult.getRemanent());
+
                 try{
                     NumberUtils.checkIfNegative(expense.getAmount());
                 } catch (NegativeNumberException e) {
                     output.setMessage(e.getMessage()); 
                 }
+
                 return output;
             }).collect(Collectors.toList());
+
         return parseResult;
     }
 
@@ -82,13 +83,13 @@ public class TransactionProcessService {
         return validateResult;
     }
 
-    public Map<String, List<TransactionOutput>>filterTransaction(FilterRequest filterRequest){
+    public Map<String, List<TransactionOutput>> filterTransaction(FilterRequest filterRequest){
 
         Map<String, List<TransactionOutput>> result = validateTransaction(filterRequest.transactions());
 
-        List<TransactionOutput> validReceipts = result.get("valid");
+        List<TransactionOutput> validTransactions = result.get("valid");
 
-        validReceipts.parallelStream().forEach(expense -> {
+        List<TransactionOutput> finalValidTransactions =  validTransactions.parallelStream().map(expense -> {
 
             long receiptTime = DateTimeUtils.toEpochMillis(expense.getDate());
 
@@ -100,60 +101,22 @@ public class TransactionProcessService {
             if (qRuleCheck != null) {
                 finalRemanent = qRuleCheck;
             }
-            
-            // if (filterRequest.q() != null) {
-            //     long latestStart = -1;
-            //     BigDecimal qOverride = null;
-
-            //     for (RuleQ qRule : filterRequest.q()) {
-            //         long start = DateTimeUtils.toEpochMillis(qRule.getStart());
-            //         long end = DateTimeUtils.toEpochMillis(qRule.getEnd());
-
-            //         if (receiptTime >= start && receiptTime <= end) {
-            //             if (start > latestStart) {
-            //                 latestStart = start;
-            //                 qOverride = qRule.getFixed();
-            //             }
-            //         }
-            //     }
-            //     if (qOverride != null) {
-            //         finalRemanent = qOverride; 
-            //     }
-            // }
-
+        
             BigDecimal pRuleAmount = RuleEngine.checkAndCalculatePRule(receiptTime, filterRequest.p());
             finalRemanent = finalRemanent.add(pRuleAmount);
-            // if (filterRequest.p() != null) {
-            //     for (RuleP pRule : filterRequest.p()) {
-            //         long start = DateTimeUtils.toEpochMillis(pRule.getStart());
-            //         long end = DateTimeUtils.toEpochMillis(pRule.getEnd());
-
-            //         if (receiptTime >= start && receiptTime <= end) {
-            //             finalRemanent = finalRemanent.add(pRule.getExtra());
-            //         }
-            //     }
-            // }
 
             boolean belongsInBasket = RuleEngine.checkIfKRule(receiptTime, filterRequest.k());
-
-            // boolean belongsInKRule = false;
-            // if (filterRequest.k() != null) {
-            //     for (RuleK kRule : filterRequest.k()) {
-            //         long start = DateTimeUtils.toEpochMillis(kRule.getStart());
-            //         long end = DateTimeUtils.toEpochMillis(kRule.getEnd());
-
-            //         if (receiptTime >= start && receiptTime <= end) {
-            //             belongsInKRule = true;
-            //             break;
-            //         }
-            //     }
-            // }
 
             expense.setCeiling(finalCeiling);
             expense.setRemanent(finalRemanent);
             expense.setInKPeriod(belongsInBasket);
 
-        });
+            return expense;
+
+        }).filter(expense -> expense.getRemanent().compareTo(BigDecimal.ZERO) > 0)
+        .collect(Collectors.toList());;
+
+        result.put("valid", finalValidTransactions);
 
         return result;
     }

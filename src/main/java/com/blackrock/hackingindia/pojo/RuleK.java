@@ -1,14 +1,12 @@
 package com.blackrock.hackingindia.pojo;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 
+// (Evaluation Grouping)
 public class RuleK {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm[:ss]")

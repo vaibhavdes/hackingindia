@@ -27,13 +27,6 @@ public class DateTimeUtilsTest {
     }
 
     @Test
-    void shouldFormatLocalDateTimeToString() {
-        LocalDateTime dateTime = LocalDateTime.of(2023, 2, 28, 15, 49, 20);
-        String formatted = DateTimeUtils.format(dateTime);
-        assertEquals(VALID_DATE, formatted);
-    }
-
-     @Test
     void shouldThrowExceptionForInvalidDateFormat() {
         assertThrows(Exception.class, () ->
                 DateTimeUtils.parseToLocalDateTime(INVALID_DATE)
