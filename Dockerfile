@@ -1,3 +1,14 @@
+# --------- Build Stage ----------
+FROM gradle:8.5-jdk17 AS build
+
+WORKDIR /app
+
+COPY . .
+
+RUN gradle clean build -x test
+
+# --------- Run Stage ----------
+
 # Use lightweight JDK image
 FROM eclipse-temurin:21-jdk-alpine
 
@@ -8,7 +19,7 @@ WORKDIR /app
 COPY build/libs/*.jar app.jar
 
 # Expose application port
-EXPOSE 8080
+EXPOSE 5477
 
 # Run application
 ENTRYPOINT ["java","-jar","app.jar"]
