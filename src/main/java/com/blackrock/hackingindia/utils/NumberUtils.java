@@ -3,6 +3,7 @@ package com.blackrock.hackingindia.utils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import com.blackrock.hackingindia.exceptions.NegativeNumberException;
 import com.blackrock.hackingindia.pojo.Result;
 
 public class NumberUtils {
@@ -12,10 +13,6 @@ public class NumberUtils {
     private static BigDecimal hundred = new BigDecimal("100");
 
     public static Result calculateCeilingAndRemanent(BigDecimal value) {
-
-        if (value.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Expense cannot be negative");
-        }
         //double ceiling = Math.ceil(value / HUNDRED) * HUNDRED;
         //double remanent = ceiling - value;
 
@@ -25,4 +22,9 @@ public class NumberUtils {
         return new Result(ceiling, remanent);
     }
 
+    public static void checkIfNegative(BigDecimal value) {
+        if (value.compareTo(BigDecimal.ZERO) < 0) {
+            throw new NegativeNumberException("Negative amount are not allowed");
+        }
+    }
 }

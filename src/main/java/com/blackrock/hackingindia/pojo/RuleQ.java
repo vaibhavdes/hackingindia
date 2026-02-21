@@ -1,6 +1,9 @@
 package com.blackrock.hackingindia.pojo;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
@@ -12,17 +15,15 @@ public class RuleQ {
     @PositiveOrZero(message = "Fixed value must be zero or positive")
     private BigDecimal fixed;
 
-    @NotNull(message = "Start value must not be null")
-    @PositiveOrZero(message = "Start value must be zero or positive")
-    private BigDecimal start;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm[:ss]")
+    private LocalDateTime start;
 
-    @NotNull(message = "End value must not be null")
-    @PositiveOrZero(message = "End value must be zero or positive")
-    private BigDecimal end;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm[:ss]")
+    private LocalDateTime end;
 
     public RuleQ() {}
 
-    public RuleQ(BigDecimal fixed, BigDecimal start, BigDecimal end) {
+    public RuleQ(BigDecimal fixed, LocalDateTime start, LocalDateTime end) {
         this.fixed = fixed;
         this.start = start;
         this.end = end;
@@ -36,19 +37,19 @@ public class RuleQ {
         this.fixed = fixed;
     }
 
-    public BigDecimal getStart() {
+    public LocalDateTime getStart() {
         return start;
     }
 
-    public void setStart(BigDecimal start) {
+    public void setStart(LocalDateTime start) {
         this.start = start;
     }
 
-    public BigDecimal getEnd() {
+    public LocalDateTime getEnd() {
         return end;
     }
 
-    public void setEnd(BigDecimal end) {
+    public void setEnd(LocalDateTime end) {
         this.end = end;
     }
 

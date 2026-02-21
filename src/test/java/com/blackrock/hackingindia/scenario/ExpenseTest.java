@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.blackrock.hackingindia.pojo.Expense;
+import com.blackrock.hackingindia.pojo.Transaction;
 import com.blackrock.hackingindia.pojo.Result;
 import com.blackrock.hackingindia.utils.NumberUtils;
 
@@ -18,11 +18,11 @@ public class ExpenseTest {
     @Test
     void testExpensesInvestmentSummary() {
 
-        List<Expense> expenses = Arrays.asList(
-                new Expense(LocalDateTime.of(2023, 10, 12, 20, 15), new BigDecimal("250")),
-                new Expense(LocalDateTime.of(2023, 2, 28, 15, 49), new BigDecimal("375")),
-                new Expense(LocalDateTime.of(2023, 7, 1, 21, 59), new BigDecimal("620")),
-                new Expense(LocalDateTime.of(2023, 12, 17, 8, 9), new BigDecimal("480"))
+        List<Transaction> expenses = Arrays.asList(
+                new Transaction(LocalDateTime.of(2023, 10, 12, 20, 15), new BigDecimal("250")),
+                new Transaction(LocalDateTime.of(2023, 2, 28, 15, 49), new BigDecimal("375")),
+                new Transaction(LocalDateTime.of(2023, 7, 1, 21, 59), new BigDecimal("620")),
+                new Transaction(LocalDateTime.of(2023, 12, 17, 8, 9), new BigDecimal("480"))
         );
 
         BigDecimal[] expectedCeilings = {
@@ -42,7 +42,7 @@ public class ExpenseTest {
         BigDecimal totalInvestable = BigDecimal.ZERO;
 
         for (int i = 0; i < expenses.size(); i++) {
-            Expense expense = expenses.get(i);
+            Transaction expense = expenses.get(i);
             Result result = NumberUtils.calculateCeilingAndRemanent(expense.getAmount());
 
             assertEquals(expectedCeilings[i], result.getCeiling(),
